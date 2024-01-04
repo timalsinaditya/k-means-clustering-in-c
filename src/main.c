@@ -14,7 +14,29 @@
 
 #define SAMPLE_RADIUS 4.0f
 #define MEAN_RADIUS (2*SAMPLE_RADIUS)
-#define K 3
+#define K 4
+
+typedef struct {
+    Vector2 *items;
+    size_t count;
+    size_t capacity;
+} Samples;
+
+static Samples set = {0};
+static Samples cluster[K] = {0};
+static Vector2 means[K] = {0};
+Vector2 centroid = {0};
+static Color raylib_colors[] = {YELLOW, PINK, WHITE, RED, BLUE, BROWN };
+static size_t colors_count = sizeof(raylib_colors) / sizeof(raylib_colors[0]);
+
+static inline float rand_float(void) {
+    return (float)rand()/RAND_MAX;
+}
+
+static inline float lerpf(float random, float min, float max)
+{
+    return(random*(max-min)+min);
+}
 
 Vector2 project_sample_to_screen(Vector2 sample)
 {
@@ -23,17 +45,7 @@ Vector2 project_sample_to_screen(Vector2 sample)
     return CLITERAL(Vector2) { .x = GetScreenWidth()*x, .y =GetScreenHeight()- GetScreenHeight()* y};
 }
 
-typedef struct {
-    Vector2 *items;
-    size_t count;
-    size_t capacity;
-} Samples;
-
-static inline float rand_float(void) {
-    return (float)rand()/RAND_MAX;
-}
-
-static void generate_cluster(Vector2 center, float radius, size_t count, Samples *samples){
+static void generate_set(Vector2 center, float radius, size_t count, Samples *samples){
     float count_instant = count+ samples->count;
 
     samples->items = (Vector2 *)realloc(samples->items,sizeof(Vector2) * (count_instant));
@@ -51,25 +63,12 @@ static void generate_cluster(Vector2 center, float radius, size_t count, Samples
     samples->count = count_instant;;
 }
 
-static Samples set = {0};
-static Samples cluster[K] = {0};
-static Vector2 means[K] = {0};
-Vector2 centroid = {0};
-
-static inline float lerpf(float random, float min, float max)
-{
-    return(random*(max-min)+min);
-}
-
-static Color raylib_colors[] = {YELLOW, PINK, WHITE, RED, BLUE, BROWN };
-static size_t colors_count = sizeof(raylib_colors) / sizeof(raylib_colors[0]);
-
 void generate_state(void)
 {
     set.count =0;
-    generate_cluster(CLITERAL(Vector2){0,0}, 15 , 200, &set);
-    generate_cluster(CLITERAL(Vector2){MAX_X*0.5f,MAX_Y*0.5f},10, 200, &set);
-    generate_cluster(CLITERAL(Vector2){MIN_X*0.5f,MAX_Y*0.5f},5, 200, &set);
+    generate_set(CLITERAL(Vector2){0,0}, 15 , 200, &set);
+    generate_set(CLITERAL(Vector2){MAX_X*0.5f,MAX_Y*0.5f},10, 200, &set);
+    generate_set(CLITERAL(Vector2){MIN_X*0.5f,MAX_Y*0.5f},5, 200, &set);
 
     for(size_t i = 0; i<K; ++i)
     {
@@ -154,7 +153,7 @@ int main(){
             for(size_t j =0; j<cluster[i].count; ++j){
                 Vector2 it = cluster[i].items[j];
                 DrawCircleV(project_sample_to_screen(it), SAMPLE_RADIUS, color);
-               // DrawCircleV(project_sample_to_screen(centroid), 10, RED);
+                DrawCircleV(project_sample_to_screen(centroid), 10, RED);
             }
         }
 
