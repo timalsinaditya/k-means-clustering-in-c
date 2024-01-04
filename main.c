@@ -54,6 +54,7 @@ static void generate_cluster(Vector2 center, float radius, size_t count, Samples
 static Samples set = {0};
 static Samples cluster[K] = {0};
 static Vector2 means[K] = {0};
+Vector2 centroid = {0};
 
 static inline float lerpf(float random, float min, float max)
 {
@@ -66,9 +67,9 @@ static size_t colors_count = sizeof(raylib_colors) / sizeof(raylib_colors[0]);
 void generate_state(void)
 {
     set.count =0;
-    generate_cluster(CLITERAL(Vector2){0,0}, 15 , 500, &set);
-    generate_cluster(CLITERAL(Vector2){MAX_X*0.5f,MAX_Y*0.5f},10, 500, &set);
-    generate_cluster(CLITERAL(Vector2){MIN_X*0.5f,MAX_Y*0.5f},5, 500, &set);
+    generate_cluster(CLITERAL(Vector2){0,0}, 15 , 200, &set);
+    generate_cluster(CLITERAL(Vector2){MAX_X*0.5f,MAX_Y*0.5f},10, 200, &set);
+    generate_cluster(CLITERAL(Vector2){MIN_X*0.5f,MAX_Y*0.5f},5, 200, &set);
 
     for(size_t i = 0; i<K; ++i)
     {
@@ -98,11 +99,24 @@ void recluster_state(void)
                 s = sm;
             }
         }
+
         cluster[k].count += 1;
         cluster[k].items = (Vector2 *)realloc(cluster[k].items,sizeof(Vector2)*cluster[k].count);
         cluster[k].items[cluster[k].count-1] = p;
     }
 
+}
+
+void calculate_centroid()
+{
+      Vector2 temp = {0};
+      for(size_t i = 0; i<K; ++i)
+       {
+           temp.x += means[i].x;
+           temp.y += means[i].y;
+       }
+      centroid.x = temp.x / K;
+      centroid.y = temp.y / K;
 }
 
 int main(){
@@ -112,11 +126,13 @@ int main(){
     
     generate_state();
     recluster_state();
+    calculate_centroid();
 
     while(!WindowShouldClose()) {
         if(IsKeyPressed(KEY_R)){
             generate_state();
             recluster_state();
+            calculate_centroid();
         }
 
         assert(K <= colors_count);
@@ -138,7 +154,8 @@ int main(){
             for(size_t j =0; j<cluster[i].count; ++j){
                 Vector2 it = cluster[i].items[j];
                 DrawCircleV(project_sample_to_screen(it), SAMPLE_RADIUS, color);
-        }
+               // DrawCircleV(project_sample_to_screen(centroid), 10, RED);
+            }
         }
 
         EndDrawing();
