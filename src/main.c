@@ -15,7 +15,7 @@
 
 #define SAMPLE_RADIUS 4.0f
 #define MEAN_RADIUS (2*SAMPLE_RADIUS)
-#define K 4
+#define K 3
 
 typedef struct {
     Vector2 *items;
