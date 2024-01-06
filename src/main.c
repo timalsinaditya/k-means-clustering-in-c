@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <raylib.h>
 #include <stdlib.h>
@@ -106,6 +107,23 @@ void recluster_state(void)
 
 }
 
+void update_means()
+{
+    for(size_t i = 0; i<K; ++i){
+        if(cluster[i].count>0){
+            means[i] = Vector2Zero();
+            for(size_t j =0; j<cluster[i].count; ++j){
+                means[i]=Vector2Add(means[i], cluster[i].items[j]);
+            }
+            means[i].x /= cluster[i].count;
+            means[i].y /= cluster[i].count;
+        } else {
+        means[i].x = lerpf(rand_float(), MIN_X, MAX_X);
+        means[i].y = lerpf(rand_float(), MIN_Y, MAX_Y);
+        }
+    }
+}
+
 void calculate_centroid()
 {
       Vector2 temp = {0};
@@ -135,6 +153,12 @@ int main(){
         }
 
         assert(K <= colors_count);
+        
+        if(IsKeyPressed(KEY_SPACE)) {
+            update_means();
+            recluster_state();
+            calculate_centroid();
+        }
 
         BeginDrawing();
         ClearBackground(GetColor(0x181818AA));
