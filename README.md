@@ -4,3 +4,8 @@ K-means clustering algorithm divides the n set of observations into K clusters. 
 
 References: https://en.wikipedia.org/wiki/K-means_clustering
 Raylib: https://www.raylib.com/
+
+# Output:
+Here is the output:
+
+![Output](build/screenshot.png)
