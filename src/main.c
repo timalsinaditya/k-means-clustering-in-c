@@ -15,7 +15,7 @@
 
 #define SAMPLE_RADIUS 4.0f
 #define MEAN_RADIUS (2*SAMPLE_RADIUS)
-#define K 3
+#define K 4
 
 typedef struct {
     Vector2 *items;
@@ -159,7 +159,10 @@ int main(){
             recluster_state();
             calculate_centroid();
         }
-
+        
+        if (IsKeyPressed(KEY_F12)) {
+            TakeScreenshot("../build/screenshot.png");
+        }
         BeginDrawing();
         ClearBackground(GetColor(0x181818AA));
         /*
@@ -177,7 +180,7 @@ int main(){
             for(size_t j =0; j<cluster[i].count; ++j){
                 Vector2 it = cluster[i].items[j];
                 DrawCircleV(project_sample_to_screen(it), SAMPLE_RADIUS, color);
-                DrawCircleV(project_sample_to_screen(centroid), 10, RED);
+          //      DrawCircleV(project_sample_to_screen(centroid), 10, RED);
             }
         }
 
